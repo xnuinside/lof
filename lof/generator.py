@@ -20,16 +20,18 @@ def create_route(endpoint: Dict, handler: Callable, method: str, app: FastAPI):
         event = await prepare_api_gateway_event(request)
         try:
             result = _handler(event, {})
-            status_code = result.get('statusCode') or result.get('status_code') or 200
+            status_code = result.get("statusCode") or result.get("status_code") or 200
         except Exception:
             status_code = 500
-        if result.get('body'):
-            content = result.get('body')
+        if result.get("body"):
+            content = result.get("body")
         else:
             content = result
-        for header, value in result.get('headers', {}).items():
+        for header, value in result.get("headers", {}).items():
             response.headers[header] = value
-        return JSONResponse(content=content, status_code=status_code, headers=response.headers)
+        return JSONResponse(
+            content=content, status_code=status_code, headers=response.headers
+        )
 
 
 def get_query_params(multi_params: Optional[Dict]) -> Dict:
@@ -48,7 +50,7 @@ def get_multi_value_params(url: str) -> Dict:
     if len(params) == 1:
         params = []
     for param in params:
-        name, value = param.split('=')
+        name, value = param.split("=")
         if not multi_query_params.get(name):
             multi_query_params[name] = [value]
         else:
@@ -62,7 +64,7 @@ async def prepare_api_gateway_event(request: Request) -> Request:
     body = None
     try:
         body = await request.json()
-    except:
+    except Exception:
         pass
     multi_params = get_multi_value_params(request.url)
     headers = {}

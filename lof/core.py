@@ -12,7 +12,6 @@ from lof.parser import get_endpoints
 from lof.generator import create_route
 
 
-
 def set_env_variables(variables_file: str):
     if os.path.basename(variables_file).endswith(".json"):
         variables = get_variables(variables_file)
@@ -31,9 +30,8 @@ def get_variables(variables_file: str) -> Dict:
             return variables
 
 
-
 def validate_paths(template_file: str, variables_file: str):
-    if not "/" in template_file:
+    if "/" not in template_file:
         template_file = os.path.join(os.getcwd(), template_file)
     if not os.path.isfile(template_file):
         raise NoTemplate(template_file)
@@ -50,9 +48,7 @@ def add_template_path_to_python_paths(template_file, layers):
 
 
 def run_fast_api_server(
-    template_file: str,
-    exclude: List[str],
-    variables_file: Optional[str] = None
+    template_file: str, exclude: List[str], variables_file: Optional[str] = None
 ) -> FastAPI:
     validate_paths(template_file, variables_file)
 
@@ -79,7 +75,6 @@ def runner(
 ) -> None:
 
     app = run_fast_api_server(
-        template_file=template_file,
-        variables_file=variables_file,
-        exclude=exclude)
+        template_file=template_file, variables_file=variables_file, exclude=exclude
+    )
     uvicorn.run(app, host="0.0.0.0", port=8000, debug=True)
