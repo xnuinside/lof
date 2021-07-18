@@ -73,6 +73,11 @@ Fill free to open Issues & report bugs. I will solve them as soon as possible.
 Changelog
 ---------
 
+**v0.2.0**
+
+
+#. Fixed status_code resend from lambda & JSON body response
+
 **v0.1.0**
 
 

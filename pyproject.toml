@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "lof"
-version = "0.1.0"
+version = "0.2.0"
 description = "AWS Lambdas on FastAPI it is a Cli utilit that up & run your lambdas in local env based on AWS Code Deploy Config"
-authors = ["Iuliia_volkova2 <iuliia_volkova2@epam.com>"]
+authors = ["Iuliia Volkova <xnuinside@gmail.com>"]
 license = "MIT"
 readme = "docs/README.rst"
 homepage = "https://github.com/xnuinside/lof"
