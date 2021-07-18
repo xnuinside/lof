@@ -1,0 +1,105 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  SAM Template Example
+
+Resources:
+  
+  SomeLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: 'somee-layer'
+      Description: Some Lambda layer
+      ContentUri: layers/some
+      CompatibleRuntimes:
+        - python3.8
+      RetentionPolicy: Retain
+
+  CorsOptionsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'lambda-cors'
+      CodeUri: lambdas/cors_options/
+      Handler: cors_options_handler.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        CosrOptionsApi:
+          Type: Api
+          Properties:
+            Path: /v*/*
+            Method: OPTIONS
+            RestApiId: !Ref InternalApiGateway
+      AutoPublishAlias: live
+
+  LambdaAuthorizer:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: 'lambda-auth'
+      CodeUri: lambdas/auth/
+      Handler: lambda_auth.lambda_handler
+      Role: !GetAtt AuthorizerRole.Arn
+      Layers:
+        - !Ref CoreLayer
+
+  PostLambda2Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: 'post-lambda'
+      CodeUri: lambdas/lambda1/
+      Handler: lambda2.lambda_handler
+      MemorySize: 512
+      Timeout: 30
+      Layers:
+        - !Ref SomeLayer
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        MLApi:
+          Type: Api
+          Properties:
+            Path: /v1/lambda2
+            Method: post
+            RestApiId: !Ref InternalApiGateway
+      AutoPublishAlias: live
+
+  Lambda1Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'lambda-1'
+      CodeUri: lambdas/lambda1/
+      Handler: lambda.lambda_handler
+      MemorySize: 512
+      Timeout: 30
+      Layers:
+        - !Ref SomeLayer
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        MLApi:
+          Type: Api
+          Properties:
+            Path: /v1/lambda1
+            Method: get
+            RestApiId: !Ref InternalApiGateway
+      AutoPublishAlias: live
+
+
+  LambdaWithPathParamsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'lambda-path-params'
+      CodeUri: lambdas/lambda3/
+      Handler: lambda.lambda_handler
+      MemorySize: 512
+      Timeout: 30
+      Layers:
+        - !Ref SomeLayer
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        MLApi:
+          Type: Api
+          Properties:
+            Path: /v1/lambda3/{someId}
+            Method: get
+            RestApiId: !Ref InternalApiGateway
+      AutoPublishAlias: live
+    

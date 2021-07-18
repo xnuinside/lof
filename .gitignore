@@ -1,0 +1,6 @@
+*.pyc
+lof/__pycache__
+examples/__pycache__
+dist/
+.pytest_cache/
+.vscode/

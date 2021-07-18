@@ -1,0 +1,3 @@
+**v0.1.0**
+1. First version of Lambdas on FastApi. 
+Based on CodeDeploy template it's serve lambdas as FastAPI endpoints for local testing.
