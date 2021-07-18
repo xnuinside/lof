@@ -76,6 +76,9 @@ Fill free to open Issues & report bugs. I will solve them as soon as possible.
 
 
 ## Changelog
+**v0.2.0**
+1. Fixed status_code resend from lambda & JSON body response
+
 **v0.1.0**
 1. First version of Lambdas on FastApi. 
 Based on CodeDeploy template it's serve lambdas as FastAPI endpoints for local testing.
