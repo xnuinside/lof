@@ -1,5 +1,6 @@
+from typing import Dict, List
+
 import yaml
-from typing import List, Dict
 
 
 def any_constructor(loader, tag_suffix, node):
@@ -11,10 +12,12 @@ def any_constructor(loader, tag_suffix, node):
 
 
 def get_endpoints(temaplte_file: str) -> List[Dict]:
-
+    """parse Cloud Fomation Template to extract info about lambdas"""
     _resources = {}
     layers = []
+
     yaml.add_multi_constructor("", any_constructor, Loader=yaml.SafeLoader)
+
     with open(temaplte_file, "r") as tf:
         template = yaml.safe_load(tf)
         resources = template["Resources"]
@@ -24,9 +27,14 @@ def get_endpoints(temaplte_file: str) -> List[Dict]:
             elif "AWS::Serverless::LayerVersion" in resource_data["Type"]:
                 layers.append(resource_data["Properties"]["ContentUri"])
 
-    lambdas = []
+    lambdas = process_lambdas_resources(_resources)
 
-    for lambda_name, data in _resources.items():
+    return lambdas, layers
+
+
+def process_lambdas_resources(resources: Dict) -> List[Dict]:
+    lambdas = []
+    for lambda_name, data in resources.items():
         code_uri = data["Properties"]["CodeUri"].replace("/", ".")
         if not code_uri.endswith("."):
             code_uri += "."
@@ -35,16 +43,27 @@ def get_endpoints(temaplte_file: str) -> List[Dict]:
         if not events:
             # mean it is authorizer or smth relative
             continue
-        for _, event in events.items():
-            method = event["Properties"]["Method"].lower()
-            if method == "options":
-                # this is for CORS, we not insteresting
-                continue
-            _lambda = {
-                "name": lambda_name,
-                "method": method,
-                "endpoint": event["Properties"]["Path"],
-                "handler": handler,
-            }
-            lambdas.append(_lambda)
-    return lambdas, layers
+        lambdas.extend(get_lambdas_endpoints(events, lambda_name, handler))
+    return lambdas
+
+
+def get_lambdas_endpoints(
+    events: Dict, lambda_name: str, handler_str: str
+) -> List[Dict]:
+    endpoints = []
+    for _, event in events.items():
+        _type = event["Type"]
+        if _type != "Api":
+            continue
+        method = event["Properties"]["Method"].lower()
+        if method == "options":
+            # this is for CORS, we not insteresting
+            continue
+        endpoint_info = {
+            "name": lambda_name,
+            "method": method,
+            "endpoint": event["Properties"]["Path"],
+            "handler": handler_str,
+        }
+        endpoints.append(endpoint_info)
+    return endpoints

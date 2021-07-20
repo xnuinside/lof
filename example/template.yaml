@@ -103,3 +103,22 @@ Resources:
             RestApiId: !Ref InternalApiGateway
       AutoPublishAlias: live
     
+  UpdateLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'lambda-path-params'
+      CodeUri: lambdas/update_lambda/
+      Handler: update_lambda.lambda_handler
+      MemorySize: 512
+      Timeout: 30
+      Layers:
+        - !Ref SomeLayer
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        MLApi:
+          Type: Api
+          Properties:
+            Path: /v1/update
+            Method: get
+            RestApiId: !Ref InternalApiGateway
+      AutoPublishAlias: live

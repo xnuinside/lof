@@ -1,6 +1,5 @@
-import json
 import importlib
-
+import json
 from typing import Callable, Dict, Optional
 
 from fastapi import FastAPI, Request, Response
@@ -18,31 +17,33 @@ def create_route(endpoint: Dict, handler: Callable, method: str, app: FastAPI):
         my_module = importlib.import_module(module)
         _handler = getattr(my_module, _handler)
         event = await prepare_api_gateway_event(request)
-        try:
-            result = _handler(event, {})
-            status_code = result.get("statusCode") or result.get("status_code") or 200
-        except Exception:
-            status_code = 500
+        result = _handler(event, {})
+        status_code = result.get("statusCode") or result.get("status_code") or 200
         if result.get("body"):
             content = result.get("body")
         else:
             content = result
         for header, value in result.get("headers", {}).items():
             response.headers[header] = value
-        return JSONResponse(
-            content=content, status_code=status_code, headers=response.headers
-        )
+        if status_code == 204:
+            response = Response(status_code=status_code)
+        else:
+            response = JSONResponse(
+                content=content, status_code=status_code, headers=response.headers
+            )
+        return response
 
 
 def get_query_params(multi_params: Optional[Dict]) -> Dict:
     params = {}
     if multi_params:
         for param in multi_params:
-            params[param] = multi_params[param][0]
+            params[param] = multi_params[param][-1]
         return params
 
 
 def get_multi_value_params(url: str) -> Dict:
+    """extract parmas from url for multiqueryParams"""
     url = str(url).split("/")[-1]
     params = url.split("?")[-1]
     params = params.split("&")
