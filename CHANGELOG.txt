@@ -1,6 +1,15 @@
+**v0.2.2**
+1. README.md is updated
+2. Fixed Issue with lambdas in template, that does not have Events with Path (like S3 triggered lambdas)
+3. Fixed issue with status code 204 - now it returns correct answer with no failes.
+4. Added some tests
+
+**v0.2.1**
+1. Now LoF do not try/except lambdas errors
+
 **v0.2.0**
 1. Fixed status_code resend from lambda & JSON body response
 
 **v0.1.0**
 1. First version of Lambdas on FastApi. 
-Based on CodeDeploy template it's serve lambdas as FastAPI endpoints for local testing.
+Based on AWS CloudFormation template it's serve lambdas as FastAPI endpoints for local testing.
