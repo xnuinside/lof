@@ -1,4 +1,5 @@
 ## AWS Lambdas on FastAPI - LoF
+![badge1](https://img.shields.io/pypi/v/lof) ![badge2](https://img.shields.io/pypi/l/lof) ![badge3](https://img.shields.io/pypi/pyversions/lof)![workflow](https://github.com/xnuinside/lof/actions/workflows/main.yml/badge.svg)
 
 AWS Lambdas on FastAPI (LoF) is a command line tool that helps you fast & easy up & run your Python AWS Lambdas for tests and local development. 
 
