@@ -1,0 +1,14 @@
+import importlib
+from typing import Callable, Dict, Optional
+
+from fastapi import FastAPI, Request, Response
+from fastapi.responses import JSONResponse
+from lof.generator import prepare_api_gateway_event
+
+
+app = FastAPI()
+
+
+{% for route in routes %}
+{{ route }}
+{% endfor %}

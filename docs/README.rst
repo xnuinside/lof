@@ -52,6 +52,40 @@ To pass environment variables to Lambdas, use flag --env, you can pass variables
 
        lof --env=vars.json
 
+Other settings
+--------------
+
+.. code-block:: text
+
+
+       Usage: lof [OPTIONS]
+
+       Options:
+       --template TEXT                 Path to AWS Code Deploy template with
+                                       lambdas  [default: template.yaml]
+
+       --env TEXT                      Path to file with environment variables
+       --exclude TEXT                  Exclude lambdas.FastAPI will not up & run
+                                       them. Pass as string with comma. Example:
+                                       PostTrafficHook,PretrafficHook.  [default: ]
+
+       --port INTEGER                  Port to run lof  [default: 8000]
+       --host TEXT                     Host to run lof  [default: 0.0.0.0]
+       --workers INTEGER               Count of unicorn workers to run.If you want
+                                       run more when 1 worker LoF will generate
+                                       temp FastAPI server code for your lambdas.
+                                       [default: 1]
+
+       --debug / --no-debug            Debug flag for Uvicorn  [default: True]
+       --reload / --no-reload          Reload flag for Uvicorn  [default: False]
+       --install-completion [bash|zsh|fish|powershell|pwsh]
+                                       Install completion for the specified shell.
+       --show-completion [bash|zsh|fish|powershell|pwsh]
+                                       Show completion for the specified shell, to
+                                       copy it or customize the installation.
+
+       --help                          Show this message and exit.
+
 This mean, that lof will up & run all lambdas exclude this 2: PostTrafficHook & Roles
 
 Demo
@@ -91,6 +125,18 @@ Both points in the mix make impossible to use SAM in weak developers envs like V
 
 Changelog
 ---------
+
+**v0.3.0**
+
+
+#. Added Possimility to run multiple workers with flag --workers. 
+   This helpful if you need speed up your local server or some lambdas need to call another lambdas directly.
+#. Added flag --reload to cli if you want auto reload server when code changed (uvicor --reload)
+
+**v0.2.3**
+
+
+#. Possibility to send port & host to start several instances in same time.
 
 **v0.2.2**
 

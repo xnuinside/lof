@@ -11,7 +11,7 @@ def any_constructor(loader, tag_suffix, node):
     return loader.construct_scalar(node)
 
 
-def get_endpoints(temaplte_file: str) -> List[Dict]:
+def get_endpoints(temaplte_file: str, exclude: List[str]) -> List[Dict]:
     """parse Cloud Fomation Template to extract info about lambdas"""
     _resources = {}
     layers = []
@@ -27,23 +27,24 @@ def get_endpoints(temaplte_file: str) -> List[Dict]:
             elif "AWS::Serverless::LayerVersion" in resource_data["Type"]:
                 layers.append(resource_data["Properties"]["ContentUri"])
 
-    lambdas = process_lambdas_resources(_resources)
+    lambdas = process_lambdas_resources(_resources, exclude)
 
     return lambdas, layers
 
 
-def process_lambdas_resources(resources: Dict) -> List[Dict]:
+def process_lambdas_resources(resources: Dict, exclude: List[str]) -> List[Dict]:
     lambdas = []
     for lambda_name, data in resources.items():
-        code_uri = data["Properties"]["CodeUri"].replace("/", ".")
-        if not code_uri.endswith("."):
-            code_uri += "."
-        handler = f"{code_uri}{data['Properties']['Handler']}"
-        events = data["Properties"].get("Events")
-        if not events:
-            # mean it is authorizer or smth relative
-            continue
-        lambdas.extend(get_lambdas_endpoints(events, lambda_name, handler))
+        if lambda_name not in exclude:
+            code_uri = data["Properties"]["CodeUri"].replace("/", ".")
+            if not code_uri.endswith("."):
+                code_uri += "."
+            handler = f"{code_uri}{data['Properties']['Handler']}"
+            events = data["Properties"].get("Events")
+            if not events:
+                # mean it is authorizer or smth relative
+                continue
+            lambdas.extend(get_lambdas_endpoints(events, lambda_name, handler))
     return lambdas
 
 

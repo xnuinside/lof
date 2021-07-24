@@ -1,3 +1,12 @@
+**v0.3.0**
+1. Added Possimility to run multiple workers with flag --workers. 
+This helpful if you need speed up your local server or some lambdas need to call another lambdas directly.
+2. Added flag --reload to cli if you want auto reload server when code changed (uvicor --reload)
+
+**v0.2.3**
+1. Possibility to send port & host to start several instances in same time.
+
+
 **v0.2.2**
 1. README.md is updated
 2. Fixed Issue with lambdas in template, that does not have Events with Path (like S3 triggered lambdas)

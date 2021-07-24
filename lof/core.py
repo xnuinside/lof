@@ -1,36 +1,18 @@
-import json
 import os
 import sys
 from typing import Dict, List, Optional
 
 import uvicorn
-from dotenv import load_dotenv
 from fastapi import FastAPI
 
+from lof.code_gen import create_temp_app_folder, generate_app
+from lof.env_vars import path_for_env_file, set_env_variables
 from lof.errors import NoTemplate, NoVariablesFile
-from lof.parser import get_endpoints
 from lof.generator import create_route
+from lof.parser import get_endpoints
 
 
-def set_env_variables(variables_file: str):
-    if os.path.basename(variables_file).endswith(".json"):
-        variables = get_variables(variables_file)
-        if "Parameters" in variables:
-            variables = variables["Parameters"]
-        for variable, value in variables.items():
-            os.environ[variable] = value
-    elif os.path.basename(variables_file).startswith("."):
-        load_dotenv(variables_file)
-
-
-def get_variables(variables_file: str) -> Dict:
-    if os.path.basename(variables_file).endswith(".json"):
-        with open(variables_file, "r") as vf:
-            variables = json.load(vf)
-            return variables
-
-
-def validate_paths(template_file: str, variables_file: str):
+def validate_paths(template_file: str, variables_file: str) -> None:
     if "/" not in template_file:
         template_file = os.path.join(os.getcwd(), template_file)
     if not os.path.isfile(template_file):
@@ -40,7 +22,7 @@ def validate_paths(template_file: str, variables_file: str):
         raise NoVariablesFile(variables_file)
 
 
-def add_template_path_to_python_paths(template_file, layers):
+def add_template_path_to_python_paths(template_file: str, layers: List[str]) -> None:
     lambdas_base_dir = os.path.dirname(template_file)
     sys.path.insert(0, lambdas_base_dir)
     for layer in layers:
@@ -48,33 +30,79 @@ def add_template_path_to_python_paths(template_file, layers):
 
 
 def run_fast_api_server(
-    template_file: str, exclude: List[str], variables_file: Optional[str] = None
+    template_file: str, lambdas: List[Dict], layers: List[str], variables_file: str
 ) -> FastAPI:
-    validate_paths(template_file, variables_file)
-
-    lambdas, layers = get_endpoints(template_file)
-    add_template_path_to_python_paths(template_file, layers)
-    if variables_file:
-        set_env_variables(variables_file)
 
     app = FastAPI()
 
     for _lambda in lambdas:
-        if _lambda["name"] not in exclude:
-            create_route(
-                endpoint=_lambda["endpoint"],
-                method=_lambda["method"],
-                handler=_lambda["handler"],
-                app=app,
-            )
+        create_route(
+            endpoint=_lambda["endpoint"],
+            method=_lambda["method"],
+            handler=_lambda["handler"],
+            app=app,
+        )
     return app
 
 
-def runner(
-    template_file: str, variables_file: Optional[str], exclude: Optional[List[str]]
+def run_multiple_workers_app(
+    lambdas: List[Dict],
+    layers: List[str],
+    port: int,
+    host: str,
+    workers: int,
+    debug: bool,
+    reload: bool,
+    variables_file: str,
 ) -> None:
-
-    app = run_fast_api_server(
-        template_file=template_file, variables_file=variables_file, exclude=exclude
+    lof_dir = create_temp_app_folder()
+    env_file = None
+    if variables_file:
+        env_file = path_for_env_file(variables_file, lof_dir)
+    generate_app(lambdas=lambdas, lof_dir=lof_dir)
+    uvicorn.run(
+        "lof_app.main:app",
+        host=host,
+        port=port,
+        debug=debug,
+        reload=reload,
+        env_file=env_file,
+        workers=workers,
     )
-    uvicorn.run(app, host="0.0.0.0", port=8000, debug=True)
+
+
+def runner(
+    template_file: str,
+    variables_file: Optional[str],
+    exclude: Optional[List[str]],
+    port: Optional[str] = 8000,
+    host: Optional[str] = "0.0.0.0",
+    workers: Optional[int] = 1,
+    debug: Optional[bool] = True,
+    reload: Optional[bool] = False,
+) -> None:
+    if workers <= 0:
+        raise ValueError("Count of workers cannot be less when 1")
+
+    validate_paths(template_file, variables_file)
+
+    lambdas, layers = get_endpoints(template_file, exclude)
+
+    add_template_path_to_python_paths(template_file, layers)
+
+    if variables_file:
+        set_env_variables(variables_file)
+
+    if workers == 1 and not reload:
+
+        app = run_fast_api_server(
+            template_file=template_file,
+            variables_file=variables_file,
+            lambdas=lambdas,
+            layers=layers,
+        )
+        uvicorn.run(app, host=host, port=port, debug=debug)
+    else:
+        run_multiple_workers_app(
+            lambdas, layers, port, host, workers, debug, reload, variables_file
+        )
