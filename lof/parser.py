@@ -1,6 +1,21 @@
-from typing import Dict, List
+import json
+import os
+from typing import Dict, List, TextIO, Tuple
 
 import yaml
+
+
+def _get_format(template_file: str) -> str:
+    _, extension = os.path.splitext(template_file)
+    return extension.lower()[1:]
+
+
+def _parse_template(content: TextIO, format_name: str) -> Dict:
+    yaml.add_multi_constructor("", any_constructor, Loader=yaml.SafeLoader)
+    if format_name in ["yml", "yaml"]:
+        return yaml.safe_load(content)
+    if format_name == "json":
+        return json.load(content)
 
 
 def any_constructor(loader, tag_suffix, node):
@@ -11,15 +26,16 @@ def any_constructor(loader, tag_suffix, node):
     return loader.construct_scalar(node)
 
 
-def get_endpoints(temaplte_file: str, exclude: List[str]) -> List[Dict]:
+def get_endpoints(
+    template_file: str, exclude: List[str]
+) -> Tuple[List[Dict], List[str]]:
     """parse Cloud Fomation Template to extract info about lambdas"""
     _resources = {}
     layers = []
 
-    yaml.add_multi_constructor("", any_constructor, Loader=yaml.SafeLoader)
-
-    with open(temaplte_file, "r") as tf:
-        template = yaml.safe_load(tf)
+    with open(template_file, "r") as tf:
+        format_name = _get_format(template_file)
+        template = _parse_template(tf, format_name)
         resources = template["Resources"]
         for resource, resource_data in resources.items():
             if "AWS::Serverless::Function" in resource_data["Type"]:
