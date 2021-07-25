@@ -17,8 +17,8 @@ It does not support any other programming languages.
 
 ```
 
-Now run lof & provide to it path to your template yaml file.
-Or you can run it from source dir with template.yaml without any args
+Now run lof & provide to it path to your template yaml/json file.
+Or you can run it from source dir with template.yaml (/.json) without any args
 
 ### How to use
 
@@ -96,7 +96,6 @@ will be added soon
 ## TODO
 
 1. Add feature to call Authorizer & CORS lambdas handlers in local run.
-2. Support JSON AWS Cloud Formation Template
 
 
 ## Example
@@ -125,6 +124,8 @@ Both points in the mix make impossible to use SAM in weak developers envs like V
 1. Added Possimility to run multiple workers with flag --workers. 
 This helpful if you need speed up your local server or some lambdas need to call another lambdas directly.
 2. Added flag --reload to cli if you want auto reload server when code changed (uvicor --reload)
+3. Added support for Cloud Formation templates in JSON
+
 
 **v0.2.3**
 1. Possibility to send port & host to start several instances in same time.

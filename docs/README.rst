@@ -2,6 +2,24 @@
 AWS Lambdas on FastAPI - LoF
 ----------------------------
 
+
+.. image:: https://img.shields.io/pypi/v/lof
+   :target: https://img.shields.io/pypi/v/lof
+   :alt: badge1
+ 
+.. image:: https://img.shields.io/pypi/l/lof
+   :target: https://img.shields.io/pypi/l/lof
+   :alt: badge2
+ 
+.. image:: https://img.shields.io/pypi/pyversions/lof
+   :target: https://img.shields.io/pypi/pyversions/lof
+   :alt: badge3
+
+.. image:: https://github.com/xnuinside/lof/actions/workflows/main.yml/badge.svg
+   :target: https://github.com/xnuinside/lof/actions/workflows/main.yml/badge.svg
+   :alt: workflow
+
+
 AWS Lambdas on FastAPI (LoF) is a command line tool that helps you fast & easy up & run your Python AWS Lambdas for tests and local development. 
 
 Pay attention, that this is only for **Python lambdas**.
@@ -19,8 +37,8 @@ Install
 
        pip install lof
 
-Now run lof & provide to it path to your template yaml file.
-Or you can run it from source dir with template.yaml without any args
+Now run lof & provide to it path to your template yaml/json file.
+Or you can run it from source dir with template.yaml (/.json) without any args
 
 How to use
 ^^^^^^^^^^
@@ -98,7 +116,6 @@ TODO
 
 
 #. Add feature to call Authorizer & CORS lambdas handlers in local run.
-#. Support JSON AWS Cloud Formation Template
 
 Example
 -------
@@ -132,6 +149,7 @@ Changelog
 #. Added Possimility to run multiple workers with flag --workers. 
    This helpful if you need speed up your local server or some lambdas need to call another lambdas directly.
 #. Added flag --reload to cli if you want auto reload server when code changed (uvicor --reload)
+#. Added support for Cloud Formation templates in JSON
 
 **v0.2.3**
 
