@@ -1,3 +1,10 @@
+**v0.4.0**
+Features:
+1. 
+
+Fixes:
+1. Paths with '-' now does not cause issue during running with 1 and more worker.
+
 **v0.3.0**
 1. Added Possimility to run multiple workers with flag --workers. 
 This helpful if you need speed up your local server or some lambdas need to call another lambdas directly.
