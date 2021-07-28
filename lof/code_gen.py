@@ -40,7 +40,10 @@ def create_temp_app_folder() -> str:
 
 
 def get_function_name(method: str, endpoint: str) -> str:
-    return f"{method}_{endpoint.split('{')[0].replace('/', '_')}"
+    endpoint_name = endpoint.split("{")[0]
+    for symbol in ["/", "-", "&", "$", "%"]:
+        endpoint_name = endpoint_name.replace(symbol, "_")
+    return f"{method}_{endpoint_name}"
 
 
 def create_route(endpoint: str, method: str, handler: str):

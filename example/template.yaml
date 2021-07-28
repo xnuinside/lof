@@ -82,6 +82,26 @@ Resources:
             RestApiId: !Ref InternalApiGateway
       AutoPublishAlias: live
 
+  PathDash:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'lambda-1'
+      CodeUri: lambdas/lambda1/
+      Handler: lambda.lambda_handler
+      MemorySize: 512
+      Timeout: 30
+      Layers:
+        - !Ref SomeLayer
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        MLApi:
+          Type: Api
+          Properties:
+            Path: /v1/path-with-dash
+            Method: get
+            RestApiId: !Ref InternalApiGateway
+          AutoPublishAlias: live
+    
 
   LambdaWithPathParamsFunction:
     Type: AWS::Serverless::Function
