@@ -12,3 +12,24 @@ app = FastAPI()
 {% for route in routes %}
 {{ route }}
 {% endfor %}
+@app.middleware("http")
+async def lambda_proxy(request: Request, call_next):
+    app.event = await prepare_api_gateway_event(request)
+    
+    response = None
+    proxy_lambdas = {{ proxy_lambdas }}
+    for _lambda in proxy_lambdas:
+        handler = _lambda["handler"]
+        _handler = handler.split(".")
+        module = ".".join(_handler[0:-1])
+        _handler = _handler[-1]
+        my_module = importlib.import_module(module)
+        _handler = getattr(my_module, _handler)
+        result = _handler(app.event, {})
+        if not str(result['statusCode']).startswith("2"):
+            response = Response(status_code=result['statusCode'])
+            break
+        app.event['requestContext'].update(result['body'])
+    else: 
+        response = await call_next(request)
+    return response

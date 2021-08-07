@@ -8,7 +8,7 @@ from fastapi import FastAPI
 from lof.code_gen import create_temp_app_folder, generate_app
 from lof.env_vars import path_for_env_file, set_env_variables
 from lof.errors import NoTemplate, NoVariablesFile
-from lof.generator import create_route
+from lof.generator import create_middleware, create_route
 from lof.parser import get_endpoints
 
 
@@ -29,11 +29,11 @@ def add_template_path_to_python_paths(template_file: str, layers: List[str]) -> 
         sys.path.insert(0, layer)
 
 
-def run_fast_api_server(
-    template_file: str, lambdas: List[Dict], layers: List[str], variables_file: str
-) -> FastAPI:
+def run_fast_api_server(lambdas: List[Dict], proxy_lambdas: List[Dict]) -> FastAPI:
 
     app = FastAPI()
+
+    create_middleware(proxy_lambdas=proxy_lambdas, app=app)
 
     for _lambda in lambdas:
         create_route(
@@ -47,19 +47,19 @@ def run_fast_api_server(
 
 def run_multiple_workers_app(
     lambdas: List[Dict],
-    layers: List[str],
     port: int,
     host: str,
     workers: int,
     debug: bool,
     reload: bool,
     variables_file: str,
+    proxy_lambdas: List[Dict],
 ) -> None:
     lof_dir = create_temp_app_folder()
     env_file = None
     if variables_file:
         env_file = path_for_env_file(variables_file, lof_dir)
-    generate_app(lambdas=lambdas, lof_dir=lof_dir)
+    generate_app(lambdas=lambdas, lof_dir=lof_dir, proxy_lambdas=proxy_lambdas)
     uvicorn.run(
         "lof_app.main:app",
         host=host,
@@ -75,6 +75,7 @@ def runner(
     template_file: str,
     variables_file: Optional[str],
     exclude: Optional[List[str]],
+    proxy_lambdas: Optional[List[str]],
     port: Optional[str] = 8000,
     host: Optional[str] = "0.0.0.0",
     workers: Optional[int] = 1,
@@ -85,8 +86,9 @@ def runner(
         raise ValueError("Count of workers cannot be less when 1")
 
     validate_paths(template_file, variables_file)
-
-    lambdas, layers = get_endpoints(template_file, exclude)
+    lambdas, layers, proxy_lambdas = get_endpoints(
+        template_file, exclude, proxy_lambdas
+    )
 
     add_template_path_to_python_paths(template_file, layers)
 
@@ -95,14 +97,16 @@ def runner(
 
     if workers == 1 and not reload:
 
-        app = run_fast_api_server(
-            template_file=template_file,
-            variables_file=variables_file,
-            lambdas=lambdas,
-            layers=layers,
-        )
+        app = run_fast_api_server(lambdas=lambdas, proxy_lambdas=proxy_lambdas)
         uvicorn.run(app, host=host, port=port, debug=debug)
     else:
         run_multiple_workers_app(
-            lambdas, layers, port, host, workers, debug, reload, variables_file
+            lambdas=lambdas,
+            port=port,
+            host=host,
+            workers=workers,
+            debug=debug,
+            reload=reload,
+            variables_file=variables_file,
+            proxy_lambdas=proxy_lambdas,
         )

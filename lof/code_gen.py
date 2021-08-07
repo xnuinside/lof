@@ -11,8 +11,7 @@ route_template = """
 async def {function_name}(request: Request, response: Response):
     my_module = importlib.import_module("{module}")
     _handler = getattr(my_module, "{handler}")
-    event = await prepare_api_gateway_event(request)
-    result = _handler(event, {{}})
+    result = _handler(app.event, {{}})
     status_code = result.get("statusCode") or result.get("status_code") or 200
     if result.get("body"):
         content = result.get("body")
@@ -74,13 +73,13 @@ def get_routes(lambdas: List[Dict]) -> List[str]:
     return routes
 
 
-def render_app_template(lambdas: List[Dict]) -> str:
+def render_app_template(lambdas: List[Dict], proxy_lambdas: List[Dict]) -> str:
     current_dir = os.path.dirname(os.path.abspath(__file__))
     template_path = os.path.join(current_dir, "template.jinja2")
     with open(template_path) as file_:
         template = Template(file_.read())
     app_routes = get_routes(lambdas)
-    app_code = template.render({"routes": app_routes})
+    app_code = template.render({"routes": app_routes, "proxy_lambdas": proxy_lambdas})
     return app_code
 
 
@@ -89,6 +88,6 @@ def save_app_code(app_code, lof_dir) -> None:
         main_module.write(app_code)
 
 
-def generate_app(lambdas: List[Dict], lof_dir: str) -> str:
-    app_code = render_app_template(lambdas)
+def generate_app(lambdas: List[Dict], lof_dir: str, proxy_lambdas: List[Dict]) -> str:
+    app_code = render_app_template(lambdas, proxy_lambdas)
     save_app_code(app_code, lof_dir)

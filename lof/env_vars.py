@@ -13,7 +13,6 @@ def set_env_variables(variables_file: str):
         for variable, value in variables.items():
             os.environ[variable] = value
     elif os.path.basename(variables_file).startswith("."):
-        print(variables_file)
         load_dotenv(variables_file)
 
 

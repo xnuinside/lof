@@ -27,7 +27,7 @@ def any_constructor(loader, tag_suffix, node):
 
 
 def get_endpoints(
-    template_file: str, exclude: List[str]
+    template_file: str, exclude: List[str], proxy_lambdas: List[str]
 ) -> Tuple[List[Dict], List[str]]:
     """parse Cloud Fomation Template to extract info about lambdas"""
     _resources = {}
@@ -43,13 +43,18 @@ def get_endpoints(
             elif "AWS::Serverless::LayerVersion" in resource_data["Type"]:
                 layers.append(resource_data["Properties"]["ContentUri"])
 
-    lambdas = process_lambdas_resources(_resources, exclude)
+    lambdas, proxy_lambdas = process_lambdas_resources(
+        _resources, exclude, proxy_lambdas
+    )
 
-    return lambdas, layers
+    return lambdas, layers, proxy_lambdas
 
 
-def process_lambdas_resources(resources: Dict, exclude: List[str]) -> List[Dict]:
+def process_lambdas_resources(
+    resources: Dict, exclude: List[str], proxy_lambdas: List[str]
+) -> List[Dict]:
     lambdas = []
+    p_lambdas = []
     for lambda_name, data in resources.items():
         if lambda_name not in exclude:
             code_uri = data["Properties"]["CodeUri"].replace("/", ".")
@@ -57,11 +62,14 @@ def process_lambdas_resources(resources: Dict, exclude: List[str]) -> List[Dict]
                 code_uri += "."
             handler = f"{code_uri}{data['Properties']['Handler']}"
             events = data["Properties"].get("Events")
+            if lambda_name in proxy_lambdas:
+                p_lambdas.append({"name": lambda_name, "handler": handler})
+                continue
             if not events:
                 # mean it is authorizer or smth relative
                 continue
             lambdas.extend(get_lambdas_endpoints(events, lambda_name, handler))
-    return lambdas
+    return lambdas, p_lambdas
 
 
 def get_lambdas_endpoints(

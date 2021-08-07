@@ -142,3 +142,28 @@ Resources:
             Method: get
             RestApiId: !Ref InternalApiGateway
       AutoPublishAlias: live
+    
+  LambdaAuth:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'lambda-path-params'
+      CodeUri: lambdas/authorizer/
+      Handler: lambda_auth.lambda_handler
+      MemorySize: 512
+      Timeout: 30
+      Layers:
+        - !Ref SomeLayer
+      AutoPublishAlias: live
+    
+  LambdaProxy:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'lambda-path-params'
+      CodeUri: lambdas/lambda_proxy
+      Handler: lambda_proxy.lambda_handler
+      MemorySize: 512
+      Timeout: 30
+      Layers:
+        - !Ref SomeLayer
+      Role: !GetAtt LambdaExecutionRole.Arn
+      AutoPublishAlias: live

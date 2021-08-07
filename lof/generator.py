@@ -1,6 +1,6 @@
 import importlib
 import json
-from typing import Callable, Dict, Optional
+from typing import Callable, Dict, List, Optional
 
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
@@ -16,8 +16,7 @@ def create_route(endpoint: Dict, handler: Callable, method: str, app: FastAPI):
         _handler = _handler[-1]
         my_module = importlib.import_module(module)
         _handler = getattr(my_module, _handler)
-        event = await prepare_api_gateway_event(request)
-        result = _handler(event, {})
+        result = _handler(app.event, {})
         status_code = result.get("statusCode") or result.get("status_code") or 200
         if result.get("body"):
             content = result.get("body")
@@ -90,3 +89,26 @@ async def prepare_api_gateway_event(request: Request) -> Request:
         "isBase64Encoded": False,
     }
     return event
+
+
+def create_middleware(proxy_lambdas: List[Dict], app: FastAPI):
+    @app.middleware("http")
+    async def lambda_proxy(request: Request, call_next):
+        app.event = await prepare_api_gateway_event(request)
+
+        response = None
+        for _lambda in proxy_lambdas:
+            handler = _lambda["handler"]
+            _handler = handler.split(".")
+            module = ".".join(_handler[0:-1])
+            _handler = _handler[-1]
+            my_module = importlib.import_module(module)
+            _handler = getattr(my_module, _handler)
+            result = _handler(app.event, {})
+            if not str(result["statusCode"]).startswith("2"):
+                response = Response(status_code=result["statusCode"])
+                break
+            app.event["requestContext"].update(result["body"])
+        else:
+            response = await call_next(request)
+        return response
