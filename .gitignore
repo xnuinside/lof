@@ -1,6 +1,10 @@
 *.pyc
 lof/__pycache__
 examples/__pycache__
+examples/.lof/
 dist/
 .pytest_cache/
 .vscode/
+.DS_Store
+.coverage
+.lof

@@ -1,9 +1,13 @@
-**v0.4.0**
+**v0.4.1**
 Features:
-1. 
+1. Added option --proxy-lambdas where you can pass a list of lambdas that will be used as middleware request handlers. 
+For example, as Authorization Lambda or CORS lambda.
+
+Based on order in that you provided lambdas names in --proxy-lambdas option request will be send through them and populates same as on aws in "requestContext" field of the event.
+For example, if you use --proxy-lambdas=CORS,Authorizer this mean request first of all will go to CORS lambda and if all ok (no raise errors) will got to Authorizer lambda and when to target lambda (endpoint that you call).
 
 Fixes:
-1. Paths with '-' now does not cause issue during running with 1 and more worker.
+1. Paths with symbols '-.' now does not cause issue during running with 1 and more worker.
 
 **v0.3.0**
 1. Added Possimility to run multiple workers with flag --workers. 

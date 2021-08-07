@@ -53,6 +53,22 @@ To pass environment variables to Lambdas, use flag --env, you can pass variables
 
 ```
 
+### Autorizer Lambda
+
+To emulate behaviour of Authorizer lambda use flag --proxy-lambdas, where - LambdaAuthorizer must be changed to your lambda name from cloud formation template. Request will got through this proxy lambdas and only if everything ok it will call target lambda.
+
+Same as in API GAteway - all return values from proxy lambdas will update "requestContext" key in the event.
+
+```bash
+
+    lof --proxy-lambdas=LambdaAuthorizer
+
+    # or 
+    
+    lof --proxy-lambdas=LambdaAuthorizer,CORS # if you need to or more proxy lambdas
+
+```
+
 ## Other settings
 
 ```text
@@ -60,30 +76,31 @@ To pass environment variables to Lambdas, use flag --env, you can pass variables
     Usage: lof [OPTIONS]
 
     Options:
-    --template TEXT                 Path to AWS Code Deploy template with
-                                    lambdas  [default: template.yaml]
+  --template TEXT                 Path to AWS Code Deploy template with
+                                  lambdas  [default: template.yaml]
 
-    --env TEXT                      Path to file with environment variables
-    --exclude TEXT                  Exclude lambdas.FastAPI will not up & run
-                                    them. Pass as string with comma. Example:
-                                    PostTrafficHook,PretrafficHook.  [default: ]
+  --env TEXT                      Path to file with environment variables
+  --exclude TEXT                  Exclude lambdas.FastAPI will not up & run
+                                  them. Pass as string with comma. Example:
+                                  PostTrafficHook,PretrafficHook.  [default: ]
 
-    --port INTEGER                  Port to run lof  [default: 8000]
-    --host TEXT                     Host to run lof  [default: 0.0.0.0]
-    --workers INTEGER               Count of unicorn workers to run.If you want
-                                    run more when 1 worker LoF will generate
-                                    temp FastAPI server code for your lambdas.
-                                    [default: 1]
+  --port INTEGER                  Port to run lof  [default: 8000]
+  --host TEXT                     Host to run lof  [default: 0.0.0.0]
+  --proxy-lambdas TEXT            Lambdas Names that must be used as Handlers
+                                  for request. For example, Authorizer Lambda
+                                  or CORS Lambds. Each time when you send
+                                  request to some lambda - it will go through
+                                  those lambdas and populate 'requestContext'
+                                  in the event  [default: ]
 
-    --debug / --no-debug            Debug flag for Uvicorn  [default: True]
-    --reload / --no-reload          Reload flag for Uvicorn  [default: False]
-    --install-completion [bash|zsh|fish|powershell|pwsh]
-                                    Install completion for the specified shell.
-    --show-completion [bash|zsh|fish|powershell|pwsh]
-                                    Show completion for the specified shell, to
-                                    copy it or customize the installation.
+  --workers INTEGER               Count of unicorn workers to run.If you want
+                                  run more when 1 worker LoF will generate
+                                  temp FastAPI server code for your lambdas.
+                                  [default: 1]
 
-    --help                          Show this message and exit.
+  --debug / --no-debug            Debug flag for Uvicorn  [default: True]
+  --reload / --no-reload          Reload flag for Uvicorn  [default: False]
+  --help                          Show this message and exit.
 
 ```
 
@@ -93,10 +110,6 @@ This mean, that lof will up & run all lambdas exclude this 2: PostTrafficHook & 
 
 will be added soon
 
-## TODO
-
-1. Add feature to call Authorizer & CORS lambdas handlers in local run.
-
 
 ## Example
 To try how LoF works you can use AWS CloudFormation template.yaml & Lambdas from example/ folder.
@@ -104,7 +117,7 @@ To try how LoF works you can use AWS CloudFormation template.yaml & Lambdas from
 
 ## Issues & features request
 
-Fill free to open Issues & report bugs. I will solve them as soon as possible.
+Fill free to open Issues & report bugs. I will solve them as soon as possible. If you have any sugesstions or feature request - also fell free to open the issue.
 
 ## Problem Context
 
@@ -120,6 +133,17 @@ Both points in the mix make impossible to use SAM in weak developers envs like V
 
 
 ## Changelog
+**v0.4.1**
+Features:
+1. Added option --proxy-lambdas where you can pass a list of lambdas that will be used as middleware request handlers. 
+For example, as Authorization Lambda or CORS lambda.
+
+Based on order in that you provided lambdas names in --proxy-lambdas option request will be send through them and populates same as on aws in "requestContext" field of the event.
+For example, if you use --proxy-lambdas=CORS,Authorizer this mean request first of all will go to CORS lambda and if all ok (no raise errors) will got to Authorizer lambda and when to target lambda (endpoint that you call).
+
+Fixes:
+1. Paths with symbols '-.' now does not cause issue during running with 1 and more worker.
+
 **v0.3.0**
 1. Added Possimility to run multiple workers with flag --workers. 
 This helpful if you need speed up your local server or some lambdas need to call another lambdas directly.
