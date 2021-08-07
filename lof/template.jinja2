@@ -1,6 +1,7 @@
 import importlib
 from typing import Callable, Dict, Optional
 
+from lof.aws_context import Context
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
 from lof.generator import prepare_api_gateway_event
@@ -8,6 +9,8 @@ from lof.generator import prepare_api_gateway_event
 
 app = FastAPI()
 
+
+app.context = Context
 
 {% for route in routes %}
 {{ route }}
@@ -25,11 +28,11 @@ async def lambda_proxy(request: Request, call_next):
         _handler = _handler[-1]
         my_module = importlib.import_module(module)
         _handler = getattr(my_module, _handler)
-        result = _handler(app.event, {})
-        if not str(result['statusCode']).startswith("2"):
-            response = Response(status_code=result['statusCode'])
-            break
-        app.event['requestContext'].update(result['body'])
+        result = _handler(app.event, app.context(function_name=_lambda["name"]))
+        if 'auth' in _lambda["name"].lower():
+            app.event["requestContext"]["authorizer"] = result
+        else:
+            app.event["requestContext"].update(result)
     else: 
         response = await call_next(request)
     return response

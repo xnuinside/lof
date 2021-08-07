@@ -6,7 +6,9 @@ from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
 
 
-def create_route(endpoint: Dict, handler: Callable, method: str, app: FastAPI):
+def create_route(
+    endpoint: Dict, handler: Callable, lambda_name: str, method: str, app: FastAPI
+):
     method = getattr(app, method)
 
     @method(endpoint)
@@ -16,7 +18,8 @@ def create_route(endpoint: Dict, handler: Callable, method: str, app: FastAPI):
         _handler = _handler[-1]
         my_module = importlib.import_module(module)
         _handler = getattr(my_module, _handler)
-        result = _handler(app.event, {})
+        context = {"function_name": lambda_name}
+        result = _handler(app.event, app.context(**context))
         status_code = result.get("statusCode") or result.get("status_code") or 200
         if result.get("body"):
             content = result.get("body")
@@ -104,11 +107,12 @@ def create_middleware(proxy_lambdas: List[Dict], app: FastAPI):
             _handler = _handler[-1]
             my_module = importlib.import_module(module)
             _handler = getattr(my_module, _handler)
-            result = _handler(app.event, {})
-            if not str(result["statusCode"]).startswith("2"):
-                response = Response(status_code=result["statusCode"])
-                break
-            app.event["requestContext"].update(result["body"])
+            context = {"function_name": _lambda["name"]}
+            result = _handler(app.event, app.context(**context))
+            if "auth" in _lambda["name"].lower():
+                app.event["requestContext"]["authorizer"] = result
+            else:
+                app.event["requestContext"].update(result)
         else:
             response = await call_next(request)
         return response

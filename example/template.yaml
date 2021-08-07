@@ -16,22 +16,6 @@ Resources:
         - python3.8
       RetentionPolicy: Retain
 
-  CorsOptionsFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: !Sub 'lambda-cors'
-      CodeUri: lambdas/cors_options/
-      Handler: cors_options_handler.lambda_handler
-      Role: !GetAtt LambdaExecutionRole.Arn
-      Events:
-        CosrOptionsApi:
-          Type: Api
-          Properties:
-            Path: /v*/*
-            Method: OPTIONS
-            RestApiId: !Ref InternalApiGateway
-      AutoPublishAlias: live
-
   LambdaAuthorizer:
     Type: AWS::Serverless::Function
     Properties:
