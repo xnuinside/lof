@@ -5,6 +5,7 @@ from typing import Dict, List, Optional
 import uvicorn
 from fastapi import FastAPI
 
+from lof.aws_context import Context
 from lof.code_gen import create_temp_app_folder, generate_app
 from lof.env_vars import path_for_env_file, set_env_variables
 from lof.errors import NoTemplate, NoVariablesFile
@@ -32,6 +33,7 @@ def add_template_path_to_python_paths(template_file: str, layers: List[str]) -> 
 def run_fast_api_server(lambdas: List[Dict], proxy_lambdas: List[Dict]) -> FastAPI:
 
     app = FastAPI()
+    app.context = Context
 
     create_middleware(proxy_lambdas=proxy_lambdas, app=app)
 
@@ -41,6 +43,7 @@ def run_fast_api_server(lambdas: List[Dict], proxy_lambdas: List[Dict]) -> FastA
             method=_lambda["method"],
             handler=_lambda["handler"],
             app=app,
+            lambda_name=_lambda["name"],
         )
     return app
 

@@ -11,7 +11,7 @@ route_template = """
 async def {function_name}(request: Request, response: Response):
     my_module = importlib.import_module("{module}")
     _handler = getattr(my_module, "{handler}")
-    result = _handler(app.event, {{}})
+    result = _handler(app.event, app.context(function_name="{lambda_name}"))
     status_code = result.get("statusCode") or result.get("status_code") or 200
     if result.get("body"):
         content = result.get("body")
@@ -45,7 +45,7 @@ def get_function_name(method: str, endpoint: str) -> str:
     return f"{method}_{endpoint_name}"
 
 
-def create_route(endpoint: str, method: str, handler: str):
+def create_route(endpoint: str, method: str, handler: str, lambda_name: str) -> str:
 
     _handler = handler.split(".")
     module = ".".join(_handler[0:-1])
@@ -58,6 +58,7 @@ def create_route(endpoint: str, method: str, handler: str):
         method=method,
         module=module,
         handler=_handler,
+        lambda_name=lambda_name,
     )
 
 
@@ -68,6 +69,7 @@ def get_routes(lambdas: List[Dict]) -> List[str]:
             endpoint=_lambda["endpoint"],
             method=_lambda["method"],
             handler=_lambda["handler"],
+            lambda_name=_lambda["name"],
         )
         routes.append(route)
     return routes

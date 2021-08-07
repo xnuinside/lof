@@ -133,6 +133,9 @@ Both points in the mix make impossible to use SAM in weak developers envs like V
 
 
 ## Changelog
+**v0.5.0**
+1. Added AWS Context object. Part of values filed right now with mock values, values from config will be added in next versions.
+
 **v0.4.1**
 Features:
 1. Added option --proxy-lambdas where you can pass a list of lambdas that will be used as middleware request handlers. 

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "lof"
-version = "0.4.1"
+version = "0.5.0"
 description = "AWS Lambdas on FastAPI it is a Cli utilit that up & run your Python lambdas in local env based on AWS CloudFormation Template (json or yaml)"
 authors = ["Iuliia Volkova <xnuinside@gmail.com>"]
 license = "MIT"
