@@ -154,7 +154,7 @@ Both points in the mix make impossible to use SAM in weak developers envs like V
 Changelog
 ---------
 
-**v0.4.0** (not released yet)
+**v0.4.1**
 Features:
 
 
@@ -167,7 +167,7 @@ For example, if you use --proxy-lambdas=CORS,Authorizer this mean request first 
 Fixes:
 
 
-#. Paths with '-' now does not cause issue during running with 1 and more worker.
+#. Paths with symbols '-.' now does not cause issue during running with 1 and more worker.
 
 **v0.3.0**
 

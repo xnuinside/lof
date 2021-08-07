@@ -97,7 +97,7 @@ Resources:
         MLApi:
           Type: Api
           Properties:
-            Path: /v1/path-with-dash
+            Path: /v1/path-with-dash.html
             Method: get
             RestApiId: !Ref InternalApiGateway
           AutoPublishAlias: live

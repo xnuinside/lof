@@ -40,7 +40,7 @@ def create_temp_app_folder() -> str:
 
 def get_function_name(method: str, endpoint: str) -> str:
     endpoint_name = endpoint.split("{")[0]
-    for symbol in ["/", "-", "&", "$", "%"]:
+    for symbol in ["/", "-", "&", "$", "%", "."]:
         endpoint_name = endpoint_name.replace(symbol, "_")
     return f"{method}_{endpoint_name}"
 
