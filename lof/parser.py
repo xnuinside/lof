@@ -18,7 +18,7 @@ def _parse_template(content: TextIO, format_name: str) -> Dict:
         return json.load(content)
 
 
-def any_constructor(loader, tag_suffix, node):
+def any_constructor(loader, _, node):
     if isinstance(node, yaml.MappingNode):
         return loader.construct_mapping(node)
     if isinstance(node, yaml.SequenceNode):

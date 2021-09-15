@@ -11,6 +11,7 @@ route_template = """
 async def {function_name}(request: Request, response: Response):
     my_module = importlib.import_module("{module}")
     _handler = getattr(my_module, "{handler}")
+    app.event["pathParameters"] = request.path_params
     result = _handler(app.event, app.context(function_name="{lambda_name}"))
     status_code = result.get("statusCode") or result.get("status_code") or 200
     if result.get("body"):

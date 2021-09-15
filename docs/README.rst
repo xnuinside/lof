@@ -154,6 +154,16 @@ Both points in the mix make impossible to use SAM in weak developers envs like V
 Changelog
 ---------
 
+**v0.5.3**
+
+
+#. Fixed bunch of issues relative to missed pathParams in event & wrong authorizer context providing
+
+**v0.5.2**
+
+
+#. Bug fixies.
+
 **v0.5.0**
 
 

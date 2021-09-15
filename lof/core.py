@@ -5,12 +5,12 @@ from typing import Dict, List, Optional
 import uvicorn
 from fastapi import FastAPI
 
-from lof.aws_context import Context
 from lof.code_gen import create_temp_app_folder, generate_app
 from lof.env_vars import path_for_env_file, set_env_variables
 from lof.errors import NoTemplate, NoVariablesFile
 from lof.generator import create_middleware, create_route
 from lof.parser import get_endpoints
+from lof.providers.aws import Context
 
 
 def validate_paths(template_file: str, variables_file: str) -> None:
