@@ -42,6 +42,7 @@ jobs:
         poetry install
       env:
         POETRY_VIRTUALENVS_CREATE: false
+        ENV: ci
     - name: Test with pytest
       run: |
         pytest tests/
@@ -61,6 +62,7 @@ jobs:
         poetry install
       env:
         POETRY_VIRTUALENVS_CREATE: false
+        ENV: ci
     - name: Test with pytest
       run: |
         pytest tests/
@@ -80,6 +82,7 @@ jobs:
         poetry install
       env:
         POETRY_VIRTUALENVS_CREATE: false
+        ENV: ci
     - name: Test with pytest
       run: |
         pytest tests/
@@ -99,6 +102,7 @@ jobs:
         poetry install
       env:
         POETRY_VIRTUALENVS_CREATE: false
+        ENV: ci
     - name: Test with pytest
       run: |
         pytest tests/

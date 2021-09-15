@@ -133,6 +133,12 @@ Both points in the mix make impossible to use SAM in weak developers envs like V
 
 
 ## Changelog
+**v0.5.3**
+1. Fixed bunch of issues relative to missed pathParams in event & wrong authorizer context providing
+
+**v0.5.2**
+1. Bug fixies.
+
 **v0.5.0**
 1. Added AWS Context object. Part of values filed right now with mock values, values from config will be added in next versions.
 
