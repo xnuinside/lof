@@ -133,6 +133,9 @@ Both points in the mix make impossible to use SAM in weak developers envs like V
 
 
 ## Changelog
+**v0.5.4**
+1. Fix autorizer response population in event context
+
 **v0.5.3**
 1. Fixed bunch of issues relative to missed pathParams in event & wrong authorizer context providing
 

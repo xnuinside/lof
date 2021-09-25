@@ -30,7 +30,9 @@ async def lambda_proxy(request: Request, call_next):
         _handler = getattr(my_module, _handler)
         result = _handler(app.event, app.context(function_name=_lambda["name"]))
         if 'auth' in _lambda["name"].lower():
-            app.event["requestContext"]["authorizer"] = result
+            result.update(result['context'])
+            del result['context']
+            app.event["requestContext"]["authorizer"] = result["context"]
         else:
             app.event["requestContext"].update(result)
     else: 
