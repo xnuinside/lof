@@ -73,9 +73,9 @@ def create_middleware(proxy_lambdas: List[Dict], app: FastAPI):
 
             if "auth" in _lambda["name"].lower():
                 if "context" in result:
-                    result.update(result['context'])
-                    del result['context']
-                    app.event["requestContext"]["authorizer"] = result["context"]
+                    result.update(result["context"])
+                    del result["context"]
+                    app.event["requestContext"]["authorizer"] = result
                 else:
                     app.event["requestContext"]["authorizer"] = result
             else:
