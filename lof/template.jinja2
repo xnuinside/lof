@@ -32,7 +32,7 @@ async def lambda_proxy(request: Request, call_next):
         if 'auth' in _lambda["name"].lower():
             result.update(result['context'])
             del result['context']
-            app.event["requestContext"]["authorizer"] = result["context"]
+            app.event["requestContext"]["authorizer"] = result
         else:
             app.event["requestContext"].update(result)
     else: 
